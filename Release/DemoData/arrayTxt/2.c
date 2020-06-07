@@ -1,0 +1,6 @@
+const unsigned char array001[4] = {0x12,/***test data*********/
+0x12,
+/***8test 0x88*********/
+//0xAB,0xCD
+0x12,0x12
+};
