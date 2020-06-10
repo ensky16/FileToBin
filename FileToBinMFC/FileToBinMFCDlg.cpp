@@ -170,10 +170,14 @@ void CFileToBinMFCDlg::OnBnClickedButtonAdd()
 		int i=0;
 		TCHAR szFilter[] = _T("文本文件(*.c)|*.c|所有文件(*.*)|*.*||");
 		CFileDialog fileDlg(TRUE, _T("txt"), NULL, OFN_ALLOWMULTISELECT, szFilter, this);
-		//DWORD MAXFILE = 8; //2562 is the max
-		//fileDlg.m_ofn.nMaxFile=MAXFILE;
+ 
+		//最多允许同时打开20个文件
+		TCHAR *pBuffer = new TCHAR[MAX_PATH * 100];
+		fileDlg.m_ofn.lpstrFile = pBuffer;
+		fileDlg.m_ofn.nMaxFile = MAX_PATH * 100;
+		fileDlg.m_ofn.lpstrFile[0] = '\0'; 
 
-		char fileName[256] = {0};
+		char fileName[1024] = {0};
 		CArray<CString, CString> array_filename;
 
 		CString strFilePath; 
@@ -187,12 +191,12 @@ void CFileToBinMFCDlg::OnBnClickedButtonAdd()
 				strFilePath = fileDlg.GetNextPathName(pos_file);
 				array_filename.Add(strFilePath);
 				SetDlgItemText(IDC_EDIT1,  strFilePath);				
-				_snprintf_s(fileName, 256, "%S", strFilePath.GetBuffer());
+				_snprintf_s(fileName, 1024, "%S", strFilePath.GetBuffer());
 				fileOperationObj.readTextWriteToBinMain(fileName);
 			}//end while       
-			
+			 			
 			//we write the log
-			char fileName[256] = {0};
+			//char fileName[1024] = {0};
 			int arrayFileNameSize=array_filename.GetSize();
 			char * outputLogName=fileOperationObj.getOutputLogName();
 			char * insertReturn="\n";
@@ -202,7 +206,7 @@ void CFileToBinMFCDlg::OnBnClickedButtonAdd()
 			CTime ctCurrentTime = CTime::GetCurrentTime();
 			CString strCurrentTime = ctCurrentTime.Format("%Y-%m-%d %H:%M:%S"); 
 			fileOperationObj.writeLogFile(outputLogName, insertReturn);
-			_snprintf_s(fileName, 256, "%S", strCurrentTime.GetBuffer());
+			_snprintf_s(fileName, 1024, "%S", strCurrentTime.GetBuffer());
 			fileOperationObj.writeLogFile(outputLogName, fileName);
 			fileOperationObj.writeLogFile(outputLogName, insertReturn);
 
@@ -211,15 +215,14 @@ void CFileToBinMFCDlg::OnBnClickedButtonAdd()
 		
 			for(i=0; i<arrayFileNameSize; i++)
 			{
-				CString arryData= array_filename.GetAt(i);
-			
-				_snprintf_s(fileName, 256, "%S", arryData.GetBuffer());
+				CString arryData= array_filename.GetAt(i);			
+				_snprintf_s(fileName, 1024, "%S", arryData.GetBuffer());
 				fileOperationObj.writeLogFile(outputLogName, insertReturn);
 				fileOperationObj.writeLogFile(outputLogName, fileName);
-
 			}//end for
 			//end of write log
 		}
+		delete [] fileName;
 	}
 	catch(...)
 	{
